@@ -2,7 +2,7 @@ name: publish
 on: [push]
 jobs:
   publish-docker:
-    name: Does this need a name
+    name: publish to ghcr
     runs-on: ubuntu-latest
     env:
       REPO_NAME: ${{ github.event.repository.name }}
