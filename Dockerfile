@@ -9,7 +9,7 @@ FROM python:3.10
 LABEL authors=${AUTHORS}
 
 USER root
-RUN apt-get install -qq -y jq
+RUN apt-get -qq -y update && apt-get install -qq -y jq
 
 #============================================
 # Google Chrome
