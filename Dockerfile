@@ -9,7 +9,7 @@ FROM python:3.10
 LABEL authors=${AUTHORS}
 
 USER root
-RUN apt-get -qq -y update && apt-get install -qq -y jq
+RUN apt-get -qq -y update && apt-get install -qq -y jq curl
 
 #============================================
 # Google Chrome
@@ -27,6 +27,7 @@ RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key
   && apt-get update -qqy \
   && apt-get -qqy install \
     ${CHROME_VERSION:-google-chrome-stable} \
+    && echo $CHROME_VERSION \
   && rm /etc/apt/sources.list.d/google-chrome.list \
   && rm -rf /var/lib/apt/lists/* /var/cache/apt/*
 
@@ -36,8 +37,6 @@ RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key
 COPY --chmod=777 wrap_chrome_binary /opt/bin/wrap_chrome_binary
 RUN /opt/bin/wrap_chrome_binary
 
-USER 1200
-
 #============================================
 # Chrome webdriver
 #============================================
@@ -46,30 +45,27 @@ USER 1200
 #============================================
 ARG CHROME_DRIVER_VERSION
 
-RUN if [ ! -z "$CHROME_DRIVER_VERSION" ]; \
-  then CHROME_DRIVER_URL=https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/$CHROME_DRIVER_VERSION/linux64/chromedriver-linux64.zip ; \
-  else echo "Geting ChromeDriver binary from https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json" \
+RUN echo "Geting ChromeDriver binary from https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json" \
     && CFT_URL=https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json \
     && CFT_CHANNEL="Stable" \
-    # && if [[ $CHROME_VERSION == *"beta"* ]]; then CFT_CHANNEL="Beta"; fi \
-    # && if [[ $CHROME_VERSION == *"unstable"* ]]; then CFT_CHANNEL="Dev"; fi \
     && CTF_VALUES=$(curl -sSL $CFT_URL | jq -r --arg CFT_CHANNEL "$CFT_CHANNEL" '.channels[] | select (.channel==$CFT_CHANNEL)') \
+    && echo $CTF_VALUES \
     && CHROME_DRIVER_VERSION=$(echo $CTF_VALUES | jq -r '.version' ) \
-    && CHROME_DRIVER_URL=$(echo $CTF_VALUES | jq -r '.downloads.chromedriver[] | select(.platform=="linux64") | .url' ) ; \
-  fi \
-  && echo "Using ChromeDriver from: "$CHROME_DRIVER_URL \
-  && echo "Using ChromeDriver version: "$CHROME_DRIVER_VERSION \
-  && wget --no-verbose -O /tmp/chromedriver_linux64.zip $CHROME_DRIVER_URL \
-  && rm -rf /opt/selenium/chromedriver \
-  && sudo unzip /tmp/chromedriver_linux64.zip -d /opt/selenium \
-  && rm /tmp/chromedriver_linux64.zip \
-  && sudo mv /opt/selenium/chromedriver-linux64/chromedriver /opt/selenium/chromedriver-$CHROME_DRIVER_VERSION \
-  && sudo chmod 755 /opt/selenium/chromedriver-$CHROME_DRIVER_VERSION \
-  && sudo ln -fs /opt/selenium/chromedriver-$CHROME_DRIVER_VERSION /usr/bin/chromedriver
+    && echo $CHROME_DRIVER_VERSION \
+    && CHROME_DRIVER_URL=$(echo $CTF_VALUES | jq -r '.downloads.chromedriver[] | select(.platform=="linux64") | .url' ) \
+    && echo $CHROME_DRIVER_URL \
+    && wget --no-verbose -O /tmp/chromedriver_linux64.zip $CHROME_DRIVER_URL \
+    && rm -rf /opt/selenium/chromedriver \
+    &&  unzip /tmp/chromedriver_linux64.zip -d /opt/selenium \
+    && rm /tmp/chromedriver_linux64.zip \
+    &&  mv /opt/selenium/chromedriver-linux64/chromedriver /opt/selenium/chromedriver-$CHROME_DRIVER_VERSION \
+    &&  chmod 755 /opt/selenium/chromedriver-$CHROME_DRIVER_VERSION \
+    &&  ln -fs /opt/selenium/chromedriver-$CHROME_DRIVER_VERSION /usr/bin/chromedriver
 
-#============================================
-# Dumping Browser name and version for config
-#============================================
+
+# #============================================
+# # Dumping Browser name and version for config
+# #============================================
 RUN echo "chrome" > /opt/selenium/browser_name
 
 # Set environment variables to avoid GUI errors
