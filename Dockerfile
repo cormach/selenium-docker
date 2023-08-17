@@ -32,7 +32,7 @@ RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key
 #=================================
 # Chrome Launch Script Wrapper
 #=================================
-COPY wrap_chrome_binary /opt/bin/wrap_chrome_binary
+COPY --chmod=777 wrap_chrome_binary /opt/bin/wrap_chrome_binary
 RUN /opt/bin/wrap_chrome_binary
 
 USER 1200
