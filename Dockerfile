@@ -44,13 +44,14 @@ USER 1200
 # Latest released version will be used by default
 #============================================
 ARG CHROME_DRIVER_VERSION
+RUN apt-get update && apt-get -y jq
 RUN if [ ! -z "$CHROME_DRIVER_VERSION" ]; \
   then CHROME_DRIVER_URL=https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/$CHROME_DRIVER_VERSION/linux64/chromedriver-linux64.zip ; \
   else echo "Geting ChromeDriver binary from https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json" \
     && CFT_URL=https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json \
     && CFT_CHANNEL="Stable" \
-    && if [[ $CHROME_VERSION == *"beta"* ]]; then CFT_CHANNEL="Beta"; fi \
-    && if [[ $CHROME_VERSION == *"unstable"* ]]; then CFT_CHANNEL="Dev"; fi \
+    # && if [[ $CHROME_VERSION == *"beta"* ]]; then CFT_CHANNEL="Beta"; fi \
+    # && if [[ $CHROME_VERSION == *"unstable"* ]]; then CFT_CHANNEL="Dev"; fi \
     && CTF_VALUES=$(curl -sSL $CFT_URL | jq -r --arg CFT_CHANNEL "$CFT_CHANNEL" '.channels[] | select (.channel==$CFT_CHANNEL)') \
     && CHROME_DRIVER_VERSION=$(echo $CTF_VALUES | jq -r '.version' ) \
     && CHROME_DRIVER_URL=$(echo $CTF_VALUES | jq -r '.downloads.chromedriver[] | select(.platform=="linux64") | .url' ) ; \
