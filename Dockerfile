@@ -1,6 +1,3 @@
-# Use the official Python image as the base image
-FROM python:3.10
-
 # Install required packages
 RUN pip install selenium
 
@@ -9,7 +6,7 @@ RUN pip install selenium
 ARG NAMESPACE
 ARG VERSION
 ARG AUTHORS
-FROM ${NAMESPACE}/node-base:${VERSION}
+FROM python:3.10
 LABEL authors=${AUTHORS}
 
 USER root
