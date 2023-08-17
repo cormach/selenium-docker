@@ -1,5 +1,4 @@
-# Install required packages
-RUN pip install selenium
+
 
 # Install Chrome browser and ChromeDriver
 
@@ -74,3 +73,6 @@ RUN echo "chrome" > /opt/selenium/browser_name
 # Set environment variables to avoid GUI errors
 ENV PYTHONUNBUFFERED=1
 ENV DISPLAY=:99
+
+# Install required packages
+RUN pip install selenium
