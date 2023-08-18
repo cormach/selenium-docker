@@ -75,4 +75,4 @@ ENV DISPLAY=:99
 USER 1200
 
 # Install required packages
-RUN pip install selenium
+RUN pip install --user selenium
