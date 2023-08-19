@@ -72,7 +72,5 @@ RUN echo "chrome" > /opt/selenium/browser_name
 ENV PYTHONUNBUFFERED=1
 ENV DISPLAY=:99
 
-USER 1200
-
 # Install required packages
-RUN pip install selenium
+RUN pip install --user selenium
